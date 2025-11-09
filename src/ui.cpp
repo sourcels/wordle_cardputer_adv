@@ -2,6 +2,7 @@
 #include "words.h"
 
 bool isWord = false;
+bool needRedraw = true;
 String currentGuess = "";
 int currentAttempt = 0;
 char guesses[MAX_ATTEMPTS][WORD_LENGTH + 1];
@@ -237,12 +238,15 @@ void awaitEval() {
         
         currentGuess = "";
         isWord = false;
+        needRedraw = true;
     }
 }
 
 void Task_TFT(void *pvParameters) {
     initUI();
     
+    unsigned long lastBatteryUpdate = 0;
+
     while (true) {
         awaitEval();
         M5Cardputer.update();
@@ -254,7 +258,16 @@ void Task_TFT(void *pvParameters) {
             if (ks.del) handleKeyPress('\b');
         }
 
-        draw();
+        unsigned long now = millis();
+        if (now - lastBatteryUpdate > 5000) {
+            lastBatteryUpdate = now;
+            needRedraw = true;
+        }
+
+        if (needRedraw) {
+            draw();
+            needRedraw = false;
+        }
         vTaskDelay(40 / portTICK_PERIOD_MS);
     }
 }
