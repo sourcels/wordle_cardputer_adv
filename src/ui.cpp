@@ -127,26 +127,26 @@ void draw() {
         sprite.setTextDatum(TC_DATUM);
         if (gameWon) {
             sprite.setTextColor(COLOR_GREEN, COLOR_BG);
-            sprite.drawString("Correct", sprite.width() / 2 + 30, 20);
-            sprite.drawString("guessed!", sprite.width() / 2 + 30, 32);
+            sprite.drawString("Correct", sprite.width() / 2 + 30, 40);
+            sprite.drawString("guessed!", sprite.width() / 2 + 30, 52);
         } else {
             sprite.setTextColor(TFT_RED, COLOR_BG);
-            sprite.drawString("No attempts", sprite.width() / 2 + 30, 20);
-            sprite.drawString("left!", sprite.width() / 2 + 30, 32);
+            sprite.drawString("No attempts", sprite.width() / 2 + 30, 40);
+            sprite.drawString("left!", sprite.width() / 2 + 30, 52);
             
             sprite.setTextColor(COLOR_YELLOW, COLOR_BG);
-            sprite.drawString("Word was:", sprite.width() / 2 + 30, 51);
+            sprite.drawString("Word was:", sprite.width() / 2 + 30, 71);
             char upperWord[WORD_LENGTH + 1];
             for (int i = 0; i < WORD_LENGTH; i++) {
                 upperWord[i] = toupper(targetWord[i]);
             }
             upperWord[WORD_LENGTH] = '\0';
-            sprite.drawString(upperWord, sprite.width() / 2 + 30, 63);
+            sprite.drawString(upperWord, sprite.width() / 2 + 30, 83);
         }
         
         sprite.setTextColor(TFT_WHITE, COLOR_BG);
-        sprite.drawString("Press Enter", sprite.width() / 2 + 30, sprite.height() - 20);
-        sprite.drawString("to restart", sprite.width() / 2 + 30, sprite.height() - 8);
+        sprite.drawString("Press Enter", statusX, statusY - 12);
+        sprite.drawString("to restart", statusX, statusY);
 
         sprite.pushSprite(0, 0);
         return;
