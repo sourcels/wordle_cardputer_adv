@@ -2,6 +2,10 @@
 
 **Wordle** - the popular word game is now available on **Cardputer Adv**!
 
+<p align="center">
+  <img src="cover.jpg" alt="Wordle for Cardputer Adv" width="400"/>
+</p>
+
 ## Features
 
 * ✅ Over *2000* words from the official Wordle dictionary
