@@ -2,6 +2,7 @@
 #include "words.h"
 
 bool isWord = false;
+bool lastIsWord = false;
 unsigned long lastBatteryUpdate = 0;
 String currentGuess = "";
 int currentAttempt = 0;
@@ -111,13 +112,17 @@ void draw() {
         }
     }
 
-    int statusX = 125;
+    int statusX = 150;
     int statusY = sprite.height() / 2;
-    
-    sprite.setTextDatum(ML_DATUM);
-    sprite.setTextSize(1);
 
     drawBattery();
+
+    sprite.setTextDatum(TC_DATUM);
+    sprite.setTextSize(2);
+    sprite.setTextColor(TFT_WHITE, COLOR_BG);
+    sprite.drawString("WORDLE", sprite.width() / 2 + 55, 10);
+
+    sprite.setTextSize(1);
     if (gameOver) {
         sprite.setTextDatum(TC_DATUM);
         if (gameWon) {
@@ -149,18 +154,22 @@ void draw() {
 
     if (isChecking) {
         sprite.setTextColor(COLOR_YELLOW, COLOR_BG);
-        sprite.drawString("Checking", statusX, statusY - 10);
+        sprite.drawString("Checking", statusX + 15, statusY - 10);
         sprite.drawString("...", statusX, statusY);
     } else if (currentGuess.length() == WORD_LENGTH) {
         if (isWord) {
             sprite.setTextColor(COLOR_GREEN, COLOR_BG);
             sprite.drawString("Valid!", statusX, statusY - 10);
             sprite.drawString("Press", statusX, statusY);
-            sprite.drawString("Enter", statusX, statusY + 10);
+            sprite.drawString("[ok]", statusX, statusY + 10);
+        } else if (needsEvaluation) {
+            sprite.setTextColor(COLOR_YELLOW, COLOR_BG);
+            sprite.drawString("Checking", statusX, statusY - 10);
+            sprite.drawString("...", statusX, statusY);
         } else {
             sprite.setTextColor(TFT_RED, COLOR_BG);
             sprite.drawString("Invalid", statusX, statusY - 5);
-            sprite.drawString("word", statusX, statusY + 5);
+            sprite.drawString("word!", statusX, statusY + 5);
         }
     } else if (currentGuess.length() == 0) {
         sprite.setTextColor(TFT_DARKGREY, COLOR_BG);
@@ -205,6 +214,8 @@ void handleKeyPress(char ch) {
             strcpy(guesses[currentAttempt], currentGuess.c_str());
             for (int i = 0; i < WORD_LENGTH; i++) colors[currentAttempt][i] = 0;
             
+            currentGuess = "";
+            isWord = false;
             isChecking = true;
             needsEvaluation = true;
             currentAttempt++;
@@ -240,8 +251,6 @@ void awaitEval() {
             gameOver = true;
         }
         
-        currentGuess = "";
-        isWord = false;
         needRedraw = true;
     }
 }
@@ -252,6 +261,11 @@ void Task_TFT(void *pvParameters) {
     while (true) {
         awaitEval();
         M5Cardputer.update();
+
+        if (lastIsWord != isWord) {
+            lastIsWord = isWord;
+            needRedraw = true;
+        }
         
         if (M5Cardputer.Keyboard.isChange() && M5Cardputer.Keyboard.isPressed()) {
             Keyboard_Class::KeysState ks = M5Cardputer.Keyboard.keysState();
