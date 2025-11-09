@@ -52,8 +52,6 @@ void drawTile(int row, int col, char ch, uint8_t color) {
 
     if (ch) {
         sprite.setTextDatum(MC_DATUM);
-        uint16_t textColor = (color == 1) ? TFT_BLACK : COLOR_TEXT;
-        sprite.setTextColor(textColor, fillColor);
 
         uint16_t textColor = (color == 1 || color == 2) ? TFT_BLACK : COLOR_TEXT;
         sprite.setTextColor(textColor, fillColor);
@@ -62,6 +60,35 @@ void drawTile(int row, int col, char ch, uint8_t color) {
         char buf[2] = { (char)toupper(ch), '\0' };
         sprite.drawString(buf, x + tileSize / 2, y + tileSize / 2);
     }
+}
+
+void drawBattery() {
+    int battLevel = M5Cardputer.Power.getBatteryLevel();
+
+    int batX = 5;
+    int batY = sprite.height() - 12;
+    int batW = 25;
+    int batH = 10;
+
+    sprite.drawRect(batX, batY, batW, batH, TFT_WHITE);
+    sprite.fillRect(batX + batW, batY + 3, 2, 4, TFT_WHITE);
+
+    uint16_t batColor;
+    if (battLevel > 60) batColor = COLOR_GREEN;
+    else if (battLevel > 20) batColor = COLOR_YELLOW;
+    else batColor = TFT_RED;
+
+    int fillW = (batW - 4) * battLevel / 100;
+    if (fillW > 0) {
+        sprite.fillRect(batX + 2, batY + 2, fillW, batH - 4, batColor);
+    }
+
+    sprite.setTextDatum(ML_DATUM);
+    sprite.setTextSize(1);
+    sprite.setTextColor(TFT_WHITE, COLOR_BG);
+    char batText[5];
+    sprintf(batText, "%d%%", battLevel);
+    sprite.drawString(batText, batX + batW + 5, batY + batH / 2);
 }
 
 void draw() {
@@ -111,6 +138,8 @@ void draw() {
         sprite.drawString("Press Enter", sprite.width() / 2 + 30, sprite.height() - 20);
         sprite.drawString("to restart", sprite.width() / 2 + 30, sprite.height() - 8);
         
+        drawBattery();
+
         sprite.pushSprite(0, 0);
         return;
     }
