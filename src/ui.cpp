@@ -2,13 +2,13 @@
 #include "words.h"
 
 bool isWord = false;
-bool needRedraw = true;
 unsigned long lastBatteryUpdate = 0;
 String currentGuess = "";
 int currentAttempt = 0;
 char guesses[MAX_ATTEMPTS][WORD_LENGTH + 1];
 uint8_t colors[MAX_ATTEMPTS][WORD_LENGTH];
 
+volatile bool needRedraw = true;
 volatile bool isChecking = false;
 volatile bool needsEvaluation = false;
 volatile bool gameOver = false;
@@ -31,6 +31,8 @@ void initUI() {
     sprite.createSprite(M5Cardputer.Display.width(), M5Cardputer.Display.height());
     memset(guesses, 0, sizeof(guesses));
     memset(colors, 0, sizeof(colors));
+
+    needRedraw = true;
 }
 
 void drawTile(int row, int col, char ch, uint8_t color) {
@@ -160,7 +162,7 @@ void draw() {
             sprite.drawString("Invalid", statusX, statusY - 5);
             sprite.drawString("word", statusX, statusY + 5);
         }
-    } else if (currentAttempt > 0 && currentGuess.length() == 0) {
+    } else if (currentGuess.length() == 0) {
         sprite.setTextColor(TFT_DARKGREY, COLOR_BG);
         sprite.drawString("Type", statusX, statusY - 5);
         sprite.drawString("word", statusX, statusY + 5);
