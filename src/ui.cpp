@@ -3,6 +3,7 @@
 
 bool isWord = false;
 bool needRedraw = true;
+unsigned long lastBatteryUpdate = 0;
 String currentGuess = "";
 int currentAttempt = 0;
 char guesses[MAX_ATTEMPTS][WORD_LENGTH + 1];
@@ -169,6 +170,7 @@ void draw() {
 }
 
 void handleKeyPress(char ch) {
+    needRedraw = true;
     if (gameOver) {
         if (ch == '\n') {
             currentAttempt = 0;
@@ -244,8 +246,6 @@ void awaitEval() {
 
 void Task_TFT(void *pvParameters) {
     initUI();
-    
-    unsigned long lastBatteryUpdate = 0;
 
     while (true) {
         awaitEval();

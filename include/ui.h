@@ -6,6 +6,7 @@
 #define MAX_ATTEMPTS 6
 
 extern bool isWord;
+extern bool needRedraw;
 extern String currentGuess;
 extern int currentAttempt;
 extern char guesses[MAX_ATTEMPTS][WORD_LENGTH + 1];
