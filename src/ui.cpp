@@ -65,10 +65,10 @@ void drawTile(int row, int col, char ch, uint8_t color) {
 void drawBattery() {
     int battLevel = M5Cardputer.Power.getBatteryLevel();
 
-    int batX = 5;
-    int batY = sprite.height() - 12;
     int batW = 25;
     int batH = 10;
+    int batX = sprite.width() - batW - 35;
+    int batY = sprite.height() - 12;
 
     sprite.drawRect(batX, batY, batW, batH, TFT_WHITE);
     sprite.fillRect(batX + batW, batY + 3, 2, 4, TFT_WHITE);
@@ -113,6 +113,7 @@ void draw() {
     sprite.setTextDatum(ML_DATUM);
     sprite.setTextSize(1);
 
+    drawBattery();
     if (gameOver) {
         sprite.setTextDatum(TC_DATUM);
         if (gameWon) {
@@ -137,8 +138,6 @@ void draw() {
         sprite.setTextColor(TFT_WHITE, COLOR_BG);
         sprite.drawString("Press Enter", sprite.width() / 2 + 30, sprite.height() - 20);
         sprite.drawString("to restart", sprite.width() / 2 + 30, sprite.height() - 8);
-        
-        drawBattery();
 
         sprite.pushSprite(0, 0);
         return;
