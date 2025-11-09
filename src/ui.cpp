@@ -203,36 +203,6 @@ void handleKeyPress(char ch) {
             isChecking = true;
             needsEvaluation = true;
             currentAttempt++;
-
-            int timeout = 0;
-            while (needsEvaluation && timeout < 100) {
-                vTaskDelay(10 / portTICK_PERIOD_MS);
-                timeout++;
-            }
-            
-            isChecking = false;
-
-            if (currentAttempt > 0) {
-                int row = currentAttempt - 1;
-                bool allGreen = true;
-                for (int i = 0; i < WORD_LENGTH; i++) {
-                    if (colors[row][i] != 2) {
-                        allGreen = false;
-                        break;
-                    }
-                }
-                if (allGreen) {
-                    gameOver = true;
-                    gameWon = true;
-                }
-            }
-
-            if (currentAttempt >= MAX_ATTEMPTS && !gameWon) {
-                gameOver = true;
-            }
-            
-            currentGuess = "";
-            isWord = false;
         }
     } else if (isalpha(ch)) {
         if (currentGuess.length() < WORD_LENGTH) {
@@ -242,11 +212,41 @@ void handleKeyPress(char ch) {
     }
 }
 
+void awaitEval() {
+    if (isChecking && !needsEvaluation) {
+        isChecking = false;
+        
+        if (currentAttempt > 0) {
+            int row = currentAttempt - 1;
+            bool allGreen = true;
+            for (int i = 0; i < WORD_LENGTH; i++) {
+                if (colors[row][i] != 2) {
+                    allGreen = false;
+                    break;
+                }
+            }
+            if (allGreen) {
+                gameOver = true;
+                gameWon = true;
+            }
+        }
+
+        if (currentAttempt >= MAX_ATTEMPTS && !gameWon) {
+            gameOver = true;
+        }
+        
+        currentGuess = "";
+        isWord = false;
+    }
+}
+
 void Task_TFT(void *pvParameters) {
     initUI();
     
     while (true) {
+        awaitEval();
         M5Cardputer.update();
+        
         if (M5Cardputer.Keyboard.isChange() && M5Cardputer.Keyboard.isPressed()) {
             Keyboard_Class::KeysState ks = M5Cardputer.Keyboard.keysState();
             for (auto ch : ks.word) handleKeyPress(ch);
