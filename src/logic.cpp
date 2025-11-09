@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <esp_random.h>
 
 char targetWord[WORD_LENGTH + 1];
 volatile bool needNewWord = false;
@@ -45,15 +46,21 @@ void evaluateGuess(const char *guess, const char *target, uint8_t *colors) {
     }
 }
 
+int getRandomWordIndex() {
+    return esp_random() % WORD_COUNT;
+}
+
 void Task_Logic(void *pvParameters) {
-    srand(millis());
-    strcpy(targetWord, wordList[rand() % WORD_COUNT]);
+    uint32_t seed = esp_random() ^ millis() ^ (uint32_t)&seed;
+    srand(seed);
+    
+    strcpy(targetWord, wordList[getRandomWordIndex()]);
 
     String lastChecked = "";
     
     while (true) {
         if (needNewWord) {
-            strcpy(targetWord, wordList[rand() % WORD_COUNT]);
+            strcpy(targetWord, wordList[getRandomWordIndex()]);;
             needNewWord = false;
         }
 

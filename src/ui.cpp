@@ -113,7 +113,7 @@ void draw() {
     }
 
     int statusX = 150;
-    int statusY = sprite.height() / 2;
+    int statusY = sprite.height() / 2 + 40;
 
     drawBattery();
 
