@@ -52,8 +52,10 @@ void drawTile(int row, int col, char ch, uint8_t color) {
 
     if (ch) {
         sprite.setTextDatum(MC_DATUM);
-        sprite.setTextColor(COLOR_TEXT, fillColor);
         uint16_t textColor = (color == 1) ? TFT_BLACK : COLOR_TEXT;
+        sprite.setTextColor(textColor, fillColor);
+
+        uint16_t textColor = (color == 1 || color == 2) ? TFT_BLACK : COLOR_TEXT;
         sprite.setTextColor(textColor, fillColor);
         
         sprite.setTextSize(1);
