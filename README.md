@@ -16,6 +16,7 @@
 * Save high scores to SD card or online account
 * Add custom words to the dictionary
 * Optimizations to reduce battery consumption
+* Sound effects
 
 ## Installation and Usage
 
