@@ -1,7 +1,7 @@
 # Wordle for Cardputer Adv.
 
-![Badge](https://img.shields.io/badge/Platform-ESP32--S3-blue?style=for-the-badge&logo=espressif)
-![Badge](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Static Badge](https://img.shields.io/badge/Platform-ESP32--S3-blue?style=for-the-badge&logo=espressif)
+![Static Badge](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge&link=https%3A%2F%2Fwww.apache.org%2Flicenses%2FLICENSE-2.0)
 
 **Wordle** - the popular word game is now available on **Cardputer Adv**!
 
