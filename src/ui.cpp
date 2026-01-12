@@ -1,10 +1,15 @@
 #include "ui.h"
 #include "words.h"
+#include "anim.h"
 
-bool isWord = false;
+
+volatile bool isWord = false;
 bool lastIsWord = false;
 unsigned long lastBatteryUpdate = 0;
-String currentGuess = "";
+
+char currentGuess[WORD_LENGTH + 1] = {0};
+int currentGuessLen = 0;
+
 int currentAttempt = 0;
 char guesses[MAX_ATTEMPTS][WORD_LENGTH + 1];
 uint8_t colors[MAX_ATTEMPTS][WORD_LENGTH];
@@ -28,10 +33,12 @@ static const uint16_t COLOR_EMPTY = 0x2104;
 void initUI() {
     M5Cardputer.Display.setRotation(1);
     M5Cardputer.Display.fillScreen(COLOR_BG);
-
     sprite.createSprite(M5Cardputer.Display.width(), M5Cardputer.Display.height());
+
     memset(guesses, 0, sizeof(guesses));
     memset(colors, 0, sizeof(colors));
+    memset(currentGuess, 0, sizeof(currentGuess));
+    currentGuessLen = 0;
 
     needRedraw = true;
 }
@@ -41,7 +48,6 @@ void drawTile(int row, int col, char ch, uint8_t color) {
     int margin = 2;
     int startX = 5;
     int startY = 5 + row * (tileSize + margin);
-
     int x = startX + col * (tileSize + margin);
     int y = startY;
 
@@ -57,10 +63,8 @@ void drawTile(int row, int col, char ch, uint8_t color) {
 
     if (ch) {
         sprite.setTextDatum(MC_DATUM);
-
         uint16_t textColor = (color == 1 || color == 2) ? TFT_BLACK : COLOR_TEXT;
         sprite.setTextColor(textColor, fillColor);
-        
         sprite.setTextSize(1);
         char buf[2] = { (char)toupper(ch), '\0' };
         sprite.drawString(buf, x + tileSize / 2, y + tileSize / 2);
@@ -98,6 +102,7 @@ void drawBattery() {
 
 void draw() {
     sprite.fillSprite(COLOR_BG);
+
     for (int r = 0; r < MAX_ATTEMPTS; r++) {
         for (int c = 0; c < WORD_LENGTH; c++) {
             char ch = guesses[r][c];
@@ -107,8 +112,11 @@ void draw() {
     }
 
     if (currentAttempt < MAX_ATTEMPTS && !gameOver) {
-        for (int c = 0; c < currentGuess.length(); c++) {
+        for (int c = 0; c < currentGuessLen; c++) {
             drawTile(currentAttempt, c, currentGuess[c], 0);
+        }
+         for (int c = currentGuessLen; c < WORD_LENGTH; c++) {
+            drawTile(currentAttempt, c, 0, 0);
         }
     }
 
@@ -156,7 +164,7 @@ void draw() {
         sprite.setTextColor(COLOR_YELLOW, COLOR_BG);
         sprite.drawString("Checking", statusX + 15, statusY - 10);
         sprite.drawString("...", statusX, statusY);
-    } else if (currentGuess.length() == WORD_LENGTH) {
+    } else if (currentGuessLen == WORD_LENGTH) {
         if (isWord) {
             sprite.setTextColor(COLOR_GREEN, COLOR_BG);
             sprite.drawString("Valid!", statusX, statusY - 10);
@@ -171,7 +179,7 @@ void draw() {
             sprite.drawString("Invalid", statusX, statusY - 5);
             sprite.drawString("word!", statusX, statusY + 5);
         }
-    } else if (currentGuess.length() == 0) {
+    } else if (currentGuessLen == 0) {
         sprite.setTextColor(TFT_DARKGREY, COLOR_BG);
         sprite.drawString("Type", statusX, statusY - 5);
         sprite.drawString("word", statusX, statusY + 5);
@@ -181,11 +189,11 @@ void draw() {
 }
 
 void handleKeyPress(char ch) {
-    needRedraw = true;
     if (gameOver) {
         if (ch == '\n') {
             currentAttempt = 0;
-            currentGuess = "";
+            currentGuessLen = 0;
+            memset(currentGuess, 0, sizeof(currentGuess));
             isWord = false;
             isChecking = false;
             needsEvaluation = false;
@@ -196,34 +204,49 @@ void handleKeyPress(char ch) {
 
             extern volatile bool needNewWord;
             needNewWord = true;
+            needRedraw = true;
         }
         return;
     }
     
-    if (currentAttempt >= MAX_ATTEMPTS) return;
-    if (isChecking) return;
+    if (currentAttempt >= MAX_ATTEMPTS || isChecking) return;
 
     if (ch == '\b') {
-        if (currentGuess.length() > 0) {
-            currentGuess.remove(currentGuess.length() - 1);
+        if (currentGuessLen > 0) {
+            animateDelete(&sprite, currentAttempt, currentGuessLen - 1, currentGuess[currentGuessLen - 1], COLOR_EMPTY, COLOR_BORDER, COLOR_TEXT);
+
+            currentGuessLen--;
+            currentGuess[currentGuessLen] = '\0';
+
             isWord = false;
             needsEvaluation = false;
+            needRedraw = true;
         }
     } else if (ch == '\n') {
-        if (currentGuess.length() == WORD_LENGTH && isWord) {
-            strcpy(guesses[currentAttempt], currentGuess.c_str());
-            for (int i = 0; i < WORD_LENGTH; i++) colors[currentAttempt][i] = 0;
+        if (currentGuessLen == WORD_LENGTH && isWord) {
+            strcpy(guesses[currentAttempt], currentGuess);
+            memset(colors[currentAttempt], 0, WORD_LENGTH);
+
+            memset(currentGuess, 0, sizeof(currentGuess));
+            currentGuessLen = 0;
             
-            currentGuess = "";
-            isWord = false;
             isChecking = true;
             needsEvaluation = true;
             currentAttempt++;
+            needRedraw = true;
         }
     } else if (isalpha(ch)) {
-        if (currentGuess.length() < WORD_LENGTH) {
-            currentGuess += (char)tolower(ch);
+        if (currentGuessLen < WORD_LENGTH) {
+            char letter = (char)tolower(ch);
+
+            currentGuess[currentGuessLen] = letter;
+            currentGuessLen++;
+            currentGuess[currentGuessLen] = '\0';
+
+            animateInput(&sprite, currentAttempt, currentGuessLen - 1, letter, COLOR_GRAY, COLOR_BORDER, COLOR_TEXT);
+            
             needsEvaluation = false;
+            needRedraw = true;
         }
     }
 }

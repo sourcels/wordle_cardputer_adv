@@ -6,10 +6,11 @@
 #include <stdlib.h>
 #include <esp_random.h>
 
+
 char targetWord[WORD_LENGTH + 1];
 volatile bool needNewWord = false;
 
-bool wordExists(const char *guess) {
+bool wordExists(const char *guess) { // binary search, i guess it is fastest possible method
     int low = 0, high = WORD_COUNT - 1;
     while (low <= high) {
         int mid = (low + high) / 2;
@@ -56,7 +57,7 @@ void Task_Logic(void *pvParameters) {
     
     strcpy(targetWord, wordList[getRandomWordIndex()]);
 
-    String lastChecked = "";
+    char lastChecked[WORD_LENGTH + 1] = {0};
     
     while (true) {
         if (needNewWord) {
@@ -64,15 +65,20 @@ void Task_Logic(void *pvParameters) {
             needNewWord = false;
         }
 
-        if (currentGuess.length() > 0 && currentGuess != lastChecked) {
-            lastChecked = currentGuess;
+        if (strcmp(currentGuess, lastChecked) != 0) {
+            strcpy(lastChecked, currentGuess);
             
-            if (currentGuess.length() == WORD_LENGTH) {
-                char tempWord[WORD_LENGTH + 1];
-                strcpy(tempWord, currentGuess.c_str());
-                isWord = wordExists(tempWord);
+            if (strlen(lastChecked) == WORD_LENGTH) {
+                bool exists = wordExists(lastChecked);
+                if (isWord != exists) {
+                    isWord = exists;
+                    needRedraw = true; 
+                }
             } else {
-                isWord = false;
+                if (isWord) {
+                    isWord = false;
+                    needRedraw = true;
+                }
             }
         }
 
