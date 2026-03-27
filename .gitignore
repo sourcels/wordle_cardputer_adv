@@ -2,3 +2,5 @@
 .vscode/
 .words.txt
 .idea/
+.env/
+.temp/

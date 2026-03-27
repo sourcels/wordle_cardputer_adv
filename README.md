@@ -11,7 +11,7 @@
 
 ## Features
 
-* ✅ Over *2000* words from the official Wordle dictionary
+* ✅ Over *5000* words from the official Wordle dictionary also from English dictionary (thanks to [cantanope](https://github.com/cantanope))
 * ✅ Real-time word validation
 * ✅ Fully offline, **no SD card required**
 * ✅ No SPIFFS needed
@@ -21,7 +21,6 @@
 
 * "Word of the Day" mode
 * Save high scores to SD card or online account
-* Add custom words to the dictionary
 * Sound effects
 
 ## Installation and Usage
@@ -48,6 +47,9 @@
 ## Contributing
 
 If you have ideas for improvements or new words for the dictionary, feel free to submit a Pull Request!
+
+Contributors:
+- [cantanope](https://github.com/cantanope)
 
 ## License
 
