@@ -18,7 +18,7 @@ void setup() {
     m5::M5Unified::config_t cfg = M5.config();
     cfg.serial_baudrate = 115200;
     cfg.internal_mic = false;
-    cfg.internal_spk = true;
+    cfg.internal_spk = false;
 
     M5Cardputer.begin(cfg, true);
 #ifdef CARDPUTER_ADV
